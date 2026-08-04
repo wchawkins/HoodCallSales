@@ -270,6 +270,59 @@ tbody tr:hover td { background: color-mix(in srgb, var(--series-blue) 6%, transp
   margin: 0;
 }
 
+.greeks-section {
+  margin-top: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 16px;
+}
+
+.greeks-section summary {
+  padding: 12px 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+.greeks-section summary:hover { color: var(--series-blue); }
+
+.greeks-list {
+  margin: 0;
+  padding: 4px 0 16px;
+}
+
+.greek-row {
+  padding: 10px 0;
+  border-top: 1px solid var(--gridline);
+}
+.greek-row:first-child { border-top: none; }
+
+.greek-row dt {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.greek-tag {
+  font-weight: 500;
+  font-size: 0.72rem;
+  color: var(--series-blue);
+  background: color-mix(in srgb, var(--series-blue) 14%, transparent);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.greek-row dd {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 .disclaimer {
   margin-top: 24px;
   font-size: 0.78rem;

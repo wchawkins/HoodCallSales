@@ -101,6 +101,59 @@
     <p class="row-count" id="row-count"></p>
   </section>
 
+  <section class="greeks-section" aria-label="Options Greeks reference">
+    <details>
+      <summary>Understanding the Greeks</summary>
+      <dl class="greeks-list">
+        <div class="greek-row">
+          <dt>Delta <span class="greek-tag">shown on this page</span></dt>
+          <dd>
+            How much an option's price moves for a $1 move in HOOD, and a rough proxy for the
+            probability it finishes in-the-money. A 0.20 delta call has roughly a 20% chance of
+            expiring ITM. Lower delta = further OTM = smaller premium but less assignment risk.
+            This is the only Greek this dashboard computes, estimated from each contract's
+            implied volatility via Black-Scholes (see the tooltip on each row for the exact
+            numbers) &mdash; it is <em>not</em> the exchange-quoted delta.
+          </dd>
+        </div>
+        <div class="greek-row">
+          <dt>Gamma</dt>
+          <dd>
+            How fast delta itself changes as HOOD moves. Gamma is highest for at-the-money
+            strikes close to expiration, which is why a short call that looks comfortably OTM can
+            suddenly swing toward assignment risk in the final days before expiration.
+          </dd>
+        </div>
+        <div class="greek-row">
+          <dt>Theta</dt>
+          <dd>
+            How much an option's price decays per day, all else equal ("time decay"). As the
+            option seller, theta decay is the mechanism that pays you: the call you sold loses
+            value simply from time passing, which is why covered call writers often prefer
+            shorter-dated, faster-decaying contracts.
+          </dd>
+        </div>
+        <div class="greek-row">
+          <dt>Vega</dt>
+          <dd>
+            How much an option's price changes for a 1-point move in implied volatility. HOOD
+            tends to run high IV, which inflates the premium you collect &mdash; but it also means
+            an IV spike (e.g. around earnings) can make your short call more expensive to buy back,
+            while an IV crush after the event benefits you as the seller.
+          </dd>
+        </div>
+        <div class="greek-row">
+          <dt>Rho</dt>
+          <dd>
+            How much an option's price changes for a 1% move in interest rates. Generally the
+            least impactful Greek for shorter-dated equity options like the ones in this table;
+            it matters more for long-dated (LEAPS) positions.
+          </dd>
+        </div>
+      </dl>
+    </details>
+  </section>
+
   <footer class="disclaimer">
     <p>
       <strong>Not financial advice.</strong> This is a personal screening tool, not a recommendation
