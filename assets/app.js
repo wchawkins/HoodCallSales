@@ -1,7 +1,10 @@
 const DATA_URL = "data/latest.json";
+const POSITION_KEY = "hoodPositionOverride";
 
 let allCandidates = [];
 let defaults = null;
+let spotPrice = null;
+let latestData = null;
 let sortState = { key: "annualizedYieldPct", dir: "desc" };
 
 const $ = (id) => document.getElementById(id);
@@ -24,6 +27,35 @@ async function loadData() {
   return res.json();
 }
 
+function loadOverride() {
+  try {
+    return JSON.parse(localStorage.getItem(POSITION_KEY));
+  } catch {
+    return null;
+  }
+}
+function saveOverride(pos) {
+  localStorage.setItem(POSITION_KEY, JSON.stringify(pos));
+}
+function clearOverride() {
+  localStorage.removeItem(POSITION_KEY);
+}
+
+// Merges any locally-saved position (from the "Edit" panel) over the repo
+// default from config.json/data.json, since the user may have rolled to a
+// new strike/expiration that hasn't been committed to the repo yet.
+function getEffectivePosition(data) {
+  const override = loadOverride();
+  const base = data.existingPosition;
+  if (!override) return { ...base, isOverride: false };
+  return {
+    strike: override.strike,
+    expiration: override.expiration,
+    sharesOwned: override.sharesOwned,
+    isOverride: true,
+  };
+}
+
 function renderStats(data) {
   const updated = new Date(data.generatedAtUtc);
   $("updated-label").textContent =
@@ -31,18 +63,46 @@ function renderStats(data) {
 
   $("stat-spot").textContent = fmtMoney(data.spotPrice);
 
-  const pos = data.existingPosition;
+  const pos = getEffectivePosition(data);
   $("stat-position").textContent = `${fmtMoney(pos.strike)} strike`;
   const dte = Math.max(
     0,
     Math.round((new Date(pos.expiration) - new Date(data.generatedAtUtc)) / 86400000)
   );
-  const badgeClass = pos.isInTheMoney ? "critical" : "good";
-  const badgeText = pos.isInTheMoney ? "ITM" : "OTM";
+  const isInTheMoney = data.spotPrice > pos.strike;
+  const badgeClass = isInTheMoney ? "critical" : "good";
+  const badgeText = isInTheMoney ? "ITM" : "OTM";
+
+  // The live mid-premium for this exact contract only exists if it's still
+  // sitting in the fetched OTM candidate universe (or it's the repo default,
+  // which the data script snapshots directly regardless of moneyness).
+  let currentPremium = null;
+  if (!pos.isOverride) {
+    currentPremium = data.existingPosition.currentPremium;
+  } else {
+    const match = allCandidates.find(
+      (c) => c.strike === Number(pos.strike) && c.expiration === pos.expiration
+    );
+    currentPremium = match ? match.premium : null;
+  }
+
   $("stat-position-sub").innerHTML =
-    `Exp ${pos.expiration} (${dte}d) · ${pos.sharesOwned} sh · ` +
+    `Exp ${escapeHtml(pos.expiration)} (${dte}d) · ${pos.sharesOwned} sh · ` +
     `<span class="badge ${badgeClass}">${badgeText}</span>` +
-    (pos.currentPremium != null ? ` · mid ${fmtMoney(pos.currentPremium)}` : "");
+    (currentPremium != null ? ` · mid ${fmtMoney(currentPremium)}` : "");
+
+  const hint = $("editor-hint");
+  if (pos.isOverride) {
+    hint.innerHTML =
+      "Showing a position saved locally in this browser only. " +
+      (currentPremium == null
+        ? "Live mid-premium isn't available for this contract (not in the fetched OTM range). "
+        : "") +
+      `<a href="https://github.com/wchawkins/HoodCallSales/edit/main/config.json" target="_blank" rel="noopener">` +
+      `Update config.json</a> to make this the shared default.`;
+  } else {
+    hint.textContent = "Showing the repo default from config.json.";
+  }
 }
 
 function renderBestCandidate(filtered) {
@@ -55,6 +115,55 @@ function renderBestCandidate(filtered) {
   $("stat-best").textContent = `${fmtMoney(best.strike)} strike, ${best.expiration}`;
   $("stat-best-sub").textContent =
     `${fmtPct(best.annualizedYieldPct)} annualized · delta ${best.delta.toFixed(2)} · ${best.dte}d`;
+}
+
+function setupPositionEditor(data) {
+  const panel = $("position-editor");
+  const toggle = $("editor-toggle");
+  const strikeInput = $("p-strike");
+  const expInput = $("p-expiration");
+  const sharesInput = $("p-shares");
+
+  function prefill() {
+    const pos = getEffectivePosition(data);
+    strikeInput.value = pos.strike;
+    expInput.value = pos.expiration;
+    sharesInput.value = pos.sharesOwned;
+  }
+  prefill();
+
+  toggle.addEventListener("click", () => {
+    panel.hidden = !panel.hidden;
+  });
+
+  $("p-save").addEventListener("click", () => {
+    const strike = parseFloat(strikeInput.value);
+    const expiration = expInput.value;
+    const sharesOwned = parseInt(sharesInput.value, 10);
+    if (!strike || !expiration || !sharesOwned) {
+      $("editor-hint").textContent = "Fill in strike, expiration, and shares owned before saving.";
+      return;
+    }
+    saveOverride({ strike, expiration, sharesOwned });
+    renderStats(data);
+    applyFilters();
+  });
+
+  $("p-clear").addEventListener("click", () => {
+    clearOverride();
+    prefill();
+    renderStats(data);
+    applyFilters();
+  });
+}
+
+function yieldTooltip(c, spot) {
+  return (
+    `Annualized yield = (premium ÷ spot price) × (365 ÷ days to expiration)\n` +
+    `= ($${c.premium.toFixed(2)} ÷ $${spot.toFixed(2)}) × (365 ÷ ${c.dte})\n` +
+    `= ${c.annualizedYieldPct.toFixed(2)}%\n\n` +
+    `Premium is the bid/ask midpoint; this assumes the same premium repeats every period, which real options don't do.`
+  );
 }
 
 function yieldTint(value, min, max) {
@@ -112,6 +221,7 @@ function renderTable(rows) {
   body.innerHTML = rows
     .map((c) => {
       const tint = yieldTint(c.annualizedYieldPct, yMin, yMax);
+      const tooltip = escapeHtml(yieldTooltip(c, spotPrice));
       return `<tr>
         <td>${escapeHtml(c.expiration)}</td>
         <td>${c.dte}</td>
@@ -120,7 +230,7 @@ function renderTable(rows) {
         <td>${fmtMoney(c.premium)}</td>
         <td>${c.impliedVolatility != null ? fmtPct(c.impliedVolatility * 100) : "—"}</td>
         <td>${c.delta.toFixed(3)}</td>
-        <td style="background:${tint}">${fmtPct(c.annualizedYieldPct)}</td>
+        <td class="yield-cell" style="background:${tint}" title="${tooltip}">${fmtPct(c.annualizedYieldPct)}</td>
         <td>${c.openInterest.toLocaleString()}</td>
         <td>${c.volume.toLocaleString()}</td>
       </tr>`;
@@ -170,8 +280,11 @@ function setupFilters(data) {
 async function init() {
   try {
     const data = await loadData();
+    latestData = data;
     allCandidates = data.candidates;
+    spotPrice = data.spotPrice;
     renderStats(data);
+    setupPositionEditor(data);
     setupFilters(data);
     setupSorting();
     document

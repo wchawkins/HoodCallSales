@@ -37,9 +37,24 @@ page itself.
 
 ## Editing your position
 
-Edit `config.json` — `sharesOwned`, `existingShortCall.strike`, and
-`existingShortCall.expiration` — whenever you roll or open a new covered
-call. The next scheduled run picks up the change automatically.
+There are two ways to update the "Current Short Call" shown on the page,
+which matter for different things:
+
+- **"Edit…" on the page itself** — click it, update strike/expiration/shares,
+  and Save. This is saved to `localStorage` in your browser only (nobody
+  else who opens the page sees it), updates the ITM/OTM badge and DTE
+  instantly, and is meant for when you've just rolled a position and don't
+  want to wait on a commit. The live mid-premium for that contract will only
+  show up if it happens to already be in the fetched OTM candidate range —
+  otherwise it shows as unavailable until the repo default is updated.
+- **`config.json`** (`sharesOwned`, `existingShortCall.strike`,
+  `existingShortCall.expiration`) — this is the shared, repo-wide default.
+  It's what `fetch_and_score.py` uses to snapshot that specific contract's
+  live premium every run (works even if the contract is in-the-money, unlike
+  the OTM candidate table). Edit it directly on GitHub (the "Edit…" panel
+  links to it once you have a local override saved) or via a normal
+  commit/push, whenever you want the change to be the default everyone
+  (including a fresh browser with no saved override) sees.
 
 ## Local development
 

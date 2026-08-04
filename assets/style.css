@@ -170,6 +170,46 @@ body {
   border-color: var(--text-secondary);
 }
 
+.btn-link {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--series-blue);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.btn-link:hover { opacity: 0.8; }
+
+.position-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.position-editor input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--page-plane);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+.editor-hint {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.editor-hint a { color: var(--series-blue); }
+
 .table-section {
   background: var(--surface-1);
   border: 1px solid var(--border);
@@ -215,6 +255,7 @@ tbody td {
 tbody td:first-child { text-align: left; }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: color-mix(in srgb, var(--series-blue) 6%, transparent); }
+.yield-cell { cursor: help; }
 
 .empty-state {
   text-align: center !important;

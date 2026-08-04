@@ -25,12 +25,31 @@
       <span class="stat-label">Current Short Call</span>
       <span class="stat-value" id="stat-position">&mdash;</span>
       <span class="stat-sub" id="stat-position-sub"></span>
+      <button type="button" id="editor-toggle" class="btn-link">Edit&hellip;</button>
     </div>
     <div class="stat-tile">
       <span class="stat-label">Top Candidate (in filter)</span>
       <span class="stat-value" id="stat-best">&mdash;</span>
       <span class="stat-sub" id="stat-best-sub"></span>
     </div>
+  </section>
+
+  <section class="position-editor" id="position-editor" hidden aria-label="Edit current short call">
+    <div class="filter-group">
+      <label for="p-strike">Strike</label>
+      <input type="number" id="p-strike" step="any" min="0" />
+    </div>
+    <div class="filter-group">
+      <label for="p-expiration">Expiration</label>
+      <input type="date" id="p-expiration" />
+    </div>
+    <div class="filter-group">
+      <label for="p-shares">Shares owned</label>
+      <input type="number" id="p-shares" step="1" min="0" />
+    </div>
+    <button type="button" id="p-save" class="btn-reset">Save</button>
+    <button type="button" id="p-clear" class="btn-reset">Use repo default</button>
+    <p class="editor-hint" id="editor-hint"></p>
   </section>
 
   <section class="filters" aria-label="Filters">
