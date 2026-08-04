@@ -1,0 +1,19 @@
+{
+  "ticker": "HOOD",
+  "sharesOwned": 100,
+  "existingShortCall": {
+    "strike": 95,
+    "expiration": "2026-08-07"
+  },
+  "screen": {
+    "minDeltaDefault": 0.15,
+    "maxDeltaDefault": 0.30,
+    "minDteDefault": 7,
+    "maxDteDefault": 45,
+    "minDteFetch": 1,
+    "maxDteFetch": 60,
+    "minDeltaFetch": 0.05,
+    "maxDeltaFetch": 0.45,
+    "riskFreeRate": 0.045
+  }
+}

@@ -1,0 +1,44 @@
+name: Update covered call data
+
+on:
+  schedule:
+    # Every 15 min, 13:00-21:59 UTC, Mon-Fri.
+    # Covers NYSE 9:30am-4:00pm ET across both EST (UTC-5) and EDT (UTC-4);
+    # fetch_and_score.py double-checks real market hours and skips a run if closed.
+    - cron: "*/15 13-21 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch data and score candidates
+        run: python scripts/fetch_and_score.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/latest.json; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git add data/latest.json
+          git commit -m "Update HOOD covered call data"
+          git push

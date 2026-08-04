@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HOOD Covered Call Screener</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div>
+      <h1>HOOD Covered Call Screener</h1>
+      <p class="subtitle" id="updated-label">Loading data&hellip;</p>
+    </div>
+  </header>
+
+  <section class="stat-row" id="stat-row" aria-label="Summary">
+    <div class="stat-tile">
+      <span class="stat-label">HOOD Spot Price</span>
+      <span class="stat-value" id="stat-spot">&mdash;</span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-label">Current Short Call</span>
+      <span class="stat-value" id="stat-position">&mdash;</span>
+      <span class="stat-sub" id="stat-position-sub"></span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-label">Top Candidate (in filter)</span>
+      <span class="stat-value" id="stat-best">&mdash;</span>
+      <span class="stat-sub" id="stat-best-sub"></span>
+    </div>
+  </section>
+
+  <section class="filters" aria-label="Filters">
+    <div class="filter-group">
+      <label for="f-delta-min">Delta min</label>
+      <input type="number" id="f-delta-min" step="0.01" min="0" max="1" />
+    </div>
+    <div class="filter-group">
+      <label for="f-delta-max">Delta max</label>
+      <input type="number" id="f-delta-max" step="0.01" min="0" max="1" />
+    </div>
+    <div class="filter-group">
+      <label for="f-dte-min">DTE min</label>
+      <input type="number" id="f-dte-min" step="1" min="0" />
+    </div>
+    <div class="filter-group">
+      <label for="f-dte-max">DTE max</label>
+      <input type="number" id="f-dte-max" step="1" min="0" />
+    </div>
+    <div class="filter-group">
+      <label for="f-min-oi">Min open interest</label>
+      <input type="number" id="f-min-oi" step="10" min="0" value="0" />
+    </div>
+    <button id="f-reset" class="btn-reset" type="button">Reset to defaults</button>
+  </section>
+
+  <section class="table-section" aria-label="Candidates">
+    <div class="table-scroll">
+      <table id="candidates-table">
+        <thead>
+          <tr>
+            <th data-key="expiration">Expiration</th>
+            <th data-key="dte">DTE</th>
+            <th data-key="strike">Strike</th>
+            <th data-key="pctOtm">% OTM</th>
+            <th data-key="premium">Premium (mid)</th>
+            <th data-key="impliedVolatility">IV</th>
+            <th data-key="delta">Delta (est.)</th>
+            <th data-key="annualizedYieldPct">Ann. Yield</th>
+            <th data-key="openInterest">Open Int.</th>
+            <th data-key="volume">Volume</th>
+          </tr>
+        </thead>
+        <tbody id="candidates-body">
+          <tr><td colspan="10" class="empty-state">Loading&hellip;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="row-count" id="row-count"></p>
+  </section>
+
+  <footer class="disclaimer">
+    <p>
+      <strong>Not financial advice.</strong> This is a personal screening tool, not a recommendation
+      to buy or sell any security. Prices are delayed quotes from Yahoo Finance and may be stale outside
+      of the update schedule. Delta is <em>estimated</em> from each contract's implied volatility using
+      the Black-Scholes formula &mdash; it is not the exchange-quoted delta and can diverge from it,
+      especially for wide bid/ask spreads or low-liquidity contracts. Annualized yield assumes the
+      premium repeats every period at the same rate, which options premiums do not actually do.
+      Always verify prices and Greeks in your broker before placing a trade.
+    </p>
+  </footer>
+
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>
