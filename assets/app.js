@@ -12,6 +12,11 @@ function fmtMoney(v) {
 function fmtPct(v, digits = 1) {
   return v == null ? "—" : `${v.toFixed(digits)}%`;
 }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
 
 async function loadData() {
   const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
@@ -108,7 +113,7 @@ function renderTable(rows) {
     .map((c) => {
       const tint = yieldTint(c.annualizedYieldPct, yMin, yMax);
       return `<tr>
-        <td>${c.expiration}</td>
+        <td>${escapeHtml(c.expiration)}</td>
         <td>${c.dte}</td>
         <td>${fmtMoney(c.strike)}</td>
         <td>${fmtPct(c.pctOtm)}</td>
